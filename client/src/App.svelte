@@ -1,6 +1,6 @@
 <script>
-  import Authentication from './components/Authentication/Authentication.svelte';
+  import AuthenticationPage from './components/Authentication/Authentication.svelte';
+  // import authentication from './stores/authStore.js';
 </script>
 
-
-<Authentication />
+<AuthenticationPage />

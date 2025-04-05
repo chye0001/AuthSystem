@@ -1,17 +1,44 @@
+<script>
+    import toast, { Toaster } from 'svelte-french-toast';
+    import { authentication } from '../../../stores/authStore.js';
+    import { signIn } from '../../../api/authentication/authentication.js';
+
+
+
+    let username = $state("");
+    let password = $state("");
+
+    function handleSignIn() {
+        const credentials = {
+            username: username, 
+            password: password
+        }
+
+        const result = signIn(credentials);
+
+        result.success ? toast.success("Signing in") : toast.error("Wrong credentials try again...")
+    }
+</script>
+
+
+<Toaster />
+
 <form id="signin-card">
     <h2>Sign in</h2>
     <div class="form-group">
         <label for="signin-username">Username</label>
-        <input id="signin-username" type="text" placeholder="your username..." required>
+        <input bind:value={username} id="signin-username" type="text" placeholder="your username..." required>
     </div>
 
     <div class="form-group">
         <label for="signin-password">Password</label>
-        <input id="signin-password" type="password" placeholder="enter your password..." required>
+        <input bind:value={password} id="signin-password" type="password" placeholder="enter your password..." required>
     </div>
 
-    <button type="submit">Sign in</button>
+    <button onclick={handleSignIn}>Sign in</button>
 </form>
+
+
 
 <style>
     /* Styles from gpt */

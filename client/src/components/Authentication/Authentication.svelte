@@ -2,12 +2,6 @@
   import Signin from './Signin/Signin.svelte';
   import Signup from './Signup/Signup.svelte';
 
-  import toast, { Toaster } from 'svelte-french-toast';
-
-  function handleClick() {
-    toast.success("Hello, world!");
-  }
-
   let flipped = $state(false);
 
   function flipCard() {
@@ -15,8 +9,7 @@
   }
 </script>
 
-<Toaster />
-<button type="button" onclick={handleClick}>Toast</button>
+
 
 <div class="container">
   <div class={["card", { flipped }]}>
@@ -35,6 +28,8 @@
       : "Already have an account? Sign In"}
   </a>
 </div>
+
+
 
 <style>
   /* FROM SVELTE DOCS CARD FLIP */
