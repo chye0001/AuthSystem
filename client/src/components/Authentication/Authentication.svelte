@@ -22,10 +22,8 @@
     </div>
   </div>
 
-  <a href="#" class="flip-link" onclick={flipCard}>
-    {flipped
-      ? "Dont have an account? Sign Up"
-      : "Already have an account? Sign In"}
+  <a class="flip-link" onclick={flipCard}>
+    { flipped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
   </a>
 </div>
 
