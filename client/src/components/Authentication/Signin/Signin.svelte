@@ -8,6 +8,7 @@
     let username = $state("");
     let password = $state("");
 
+    //TODO create backend logic for handling sign in, and redirection to protected page, also make a home page
     function handleSignIn() {
         const credentials = {
             username: username, 
