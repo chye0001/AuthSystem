@@ -25,6 +25,34 @@ async function sendMail(recipientEmail, subject, message) {
   console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
 }
 
+
+
+//send email on first sign in and when detected new ip
+async function sendEmailOnSignIn(foundUser, req) {
+    
+    const registedIps = foundUser.registedIps;
+    const newSignInIp = req.ip;
+   
+    if(registedIps.size === 0) {
+        await sendMail(foundUser.email, `Welcome ${foundUser.username}!`, "welcome to our platform") // on very first sign in
+        foundUser.registedIps.add(req.ip);
+
+    } else if (!registedIps.has(newSignInIp)) {
+        await sendMail(foundUser.email, "New sign in", `We have detected a new sign in coming from this ip: ${newSignInIp}`)
+        foundUser.registedIps.add(req.ip);
+    }
+}
+
+
+
+async function sendEmailOnSignUp(newUser, req) {
+    await sendMail(newUser.email, "New signup", `Thanks for signing up, ${newUser.username}!`);
+    await sendEmailOnSignIn(newUser, req);
+}
+
+
+
 export {
-    sendMail
+    sendEmailOnSignIn,
+    sendEmailOnSignUp
 }

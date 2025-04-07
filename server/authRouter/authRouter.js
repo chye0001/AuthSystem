@@ -1,11 +1,12 @@
-import { isValidPassword } from "../util/bcrypt.js";
+import { sendEmailOnSignIn, sendEmailOnSignUp } from "../emailService/emailService.js";
+import { hashPassword, isValidPassword } from "../util/bcrypt.js";
 import dotenv from 'dotenv';
 import { Router } from "express";
-import { sendMail } from "../emailService/emailService.js";
 
 const env = dotenv.config();
 const router = Router();
 
+let nextId = 2;
 let users = [{
     id: 1,
     username: "test",
@@ -38,28 +39,52 @@ router.post("/api/v1/signin", async (req, res) => {
         
         await sendEmailOnSignIn(foundUser, req);
 
-        res.send({ username: foundUser.username });
+        res.send({ username: foundUser.username, email: email });
         
     } else {
         res.status(401).send({errorMessage: "Wrong credentials"});
     }
 })
 
-//send email on first sign in and when detected new ip
-async function sendEmailOnSignIn(foundUser, req) {
-    
-    const registedIps = foundUser.registedIps;
-    const newSignInIp = req.ip;
-   
-    if(registedIps.size === 0) {
-        await sendMail(foundUser.email, "Welcome!", "welcome to our platform") // on very first sign in
-        foundUser.registedIps.add(req.ip);
 
-    } else if (!registedIps.has(newSignInIp)) {
-        await sendMail(foundUser.email, "New sign in", `We have detected a new sign in coming from this ip: ${newSignInIp}`)
-        foundUser.registedIps.add(req.ip);
+
+router.post("/api/v1/signup", async (req, res) => {
+    const { username, email, password } = req.body;
+
+    const hashedPassword = await hashPassword(password);
+    const newUser = {
+        id: nextId++,
+        username: username,
+        email: email,
+        password: hashedPassword,
+        registedIps: new Set()
     }
-}
+
+    const isUsernameTaken = users.find( (user) => user.username === username );
+    console.log(isUsernameTaken);
+    
+    if(isUsernameTaken !== undefined) {
+        res.status(400).send({ errorMessage: "Username taken find a new one" })
+        return;
+    }
+
+    const isEmailTaken = users.find((user) => user.email === email );
+    if(isEmailTaken !== undefined) {
+        res.status(400).send({ errorMessage: "Email already in use" })
+        return;
+    }
+
+    users.push(newUser);
+
+    const newUserDTO = {
+        username: newUser.username,
+        email: newUser.email,
+        registedIps: new Set()
+    }
+    await sendEmailOnSignUp(newUserDTO, req);
+    req.session.isSignedIn = (req.session.isSignedIn) || true
+    res.send({ data: newUserDTO });
+})
 
 
 
