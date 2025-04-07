@@ -8,23 +8,32 @@
     let username = $state("");
     let password = $state("");
 
-    //TODO create backend logic for handling sign in, and redirection to protected page, also make a home page
-    function handleSignIn() {
+    //TODO redirection to protected page and implimenting of guard routes.
+    async function handleSignIn(event) {
+        event.preventDefault();
+
         const credentials = {
             username: username, 
             password: password
         }
 
-        const result = signIn(credentials);
+        let result;
+        if(!$authentication.isSignedIn) {
+            toast("Signing in...", {
+                icon: "⏳"
+            })
 
-        result.success ? toast.success("Signing in") : toast.error("Wrong credentials try again...")
+            result = await signIn(credentials);
+        }
+
+        result.success ? toast.success("Signed in") : toast.error("Wrong credentials try again...")
     }
 </script>
 
 
 <Toaster />
 
-<form id="signin-card">
+<form id="signin-card" onsubmit={handleSignIn}>
     <h2>Sign in</h2>
     <div class="form-group">
         <label for="signin-username">Username</label>
@@ -36,7 +45,7 @@
         <input bind:value={password} id="signin-password" type="password" placeholder="enter your password..." required>
     </div>
 
-    <button onclick={handleSignIn}>Sign in</button>
+    <button type="submit">Sign in</button>
 </form>
 
 
