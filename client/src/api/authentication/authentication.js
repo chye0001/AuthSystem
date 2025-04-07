@@ -18,6 +18,8 @@ async function signIn(credentials={}) {
 
     }catch(error) {
         console.error("Sign in error", error);
+        console.log(error);
+        
         return {
             success: false,
         }
