@@ -1,7 +1,7 @@
 import { checkForHttpErrors, makeOption } from "../../util/apiUtil.js";
 
 //TODO figure out how to implement .env files instead of hardcoded values
-const API_URL = "/api/v1";
+const API_URL = "/api/auth";
 
 async function signIn(credentials={}) {
 

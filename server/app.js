@@ -2,7 +2,6 @@ import dotenv from 'dotenv';
 const env = dotenv.config();
 
 
-
 import express from 'express';
 const app = express();
 app.use(express.json());
@@ -10,7 +9,6 @@ app.use(express.json());
 
 import helmet from 'helmet'
 app.use(helmet());
-
 
 
 import { rateLimit } from 'express-rate-limit'
@@ -32,7 +30,6 @@ const authLimiter = rateLimit({
 app.use("/auth", authLimiter);
 
 
-
 import session from 'express-session';
 app.use(session({
     secret: env.parsed.SESSION_SECRET, // have this secret in a .env file
@@ -42,10 +39,8 @@ app.use(session({
 }))
 
 
-
 import authRouter from './authRouter/authRouter.js';
 app.use(authRouter);
-
 
 
 const PORT = process.env.PORT || 8080;

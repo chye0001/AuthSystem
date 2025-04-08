@@ -27,14 +27,13 @@ async function sendMail(recipientEmail, subject, message) {
 
 
 
-//send email on first sign in and when detected new ip
 async function sendEmailOnSignIn(foundUser, req) {
     
     const registedIps = foundUser.registedIps;
     const newSignInIp = req.ip;
    
     if(registedIps.size === 0) {
-        await sendMail(foundUser.email, `Welcome ${foundUser.username}!`, "welcome to our platform") // on very first sign in
+        await sendMail(foundUser.email, `Welcome ${foundUser.username}!`, "welcome to our platform")
         foundUser.registedIps.add(req.ip);
 
     } else if (!registedIps.has(newSignInIp)) {
@@ -44,7 +43,7 @@ async function sendEmailOnSignIn(foundUser, req) {
 }
 
 
-
+//TODO perhaps create a file that stores default email values for signIn & signUps?
 async function sendEmailOnSignUp(newUser, req) {
     await sendMail(newUser.email, "New signup", `Thanks for signing up, ${newUser.username}!`);
     await sendEmailOnSignIn(newUser, req);
@@ -52,7 +51,20 @@ async function sendEmailOnSignUp(newUser, req) {
 
 
 
+async function sendEmailWithResetLink(email, uniqueLink) {
+  await sendMail(email, "Reset password", `Here is the link for reseting the password: ${uniqueLink}`);
+}
+
+
+
+async function sendEmailConfirmPasswordChanged(email) {
+  await sendMail(email, "Password updated", "Your password has been updated!");
+}
+
+
 export {
     sendEmailOnSignIn,
-    sendEmailOnSignUp
+    sendEmailOnSignUp,
+    sendEmailWithResetLink,
+    sendEmailConfirmPasswordChanged
 }

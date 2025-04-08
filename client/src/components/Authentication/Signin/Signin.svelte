@@ -5,7 +5,7 @@
 
 
 
-    let email = $state("");
+    let username = $state("");
     let password = $state("");
 
     //TODO redirection to protected page and implimenting of guard routes.
@@ -13,7 +13,7 @@
         event.preventDefault();
 
         const credentials = {
-            email: email, 
+            username: username, 
             password: password
         }
 
@@ -36,8 +36,8 @@
 <form id="signin-card" onsubmit={handleSignIn}>
     <h2>Sign in</h2>
     <div class="form-group">
-        <label for="signin-username">Email</label>
-        <input bind:value={email} id="signin-username" type="email" placeholder="your email..." required>
+        <label for="signin-username">Username</label>
+        <input bind:value={username} id="signin-username" type="text" placeholder="your username..." required>
     </div>
 
     <div class="form-group">

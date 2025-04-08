@@ -22,6 +22,7 @@
     </div>
   </div>
 
+  <!-- TODO ADD FORGOT PASSWORD -->
   <a class="flip-link" onclick={flipCard}>
     { flipped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
   </a>
