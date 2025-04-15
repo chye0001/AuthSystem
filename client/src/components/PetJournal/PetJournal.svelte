@@ -1,1 +1,0 @@
-<h1>Pet Journal page</h1>

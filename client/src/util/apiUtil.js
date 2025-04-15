@@ -1,4 +1,11 @@
 function makeOption(httpMethod, body) {
+
+    const httpMethods = ["GET", "POST", "PUT", "PATCH", "DELETE"];
+    if (!httpMethods.includes(httpMethod.toUpperCase())) {
+        console.log("Incorrect http method");
+        throw Error();
+    }
+
     const option = {
         method: httpMethod.toUpperCase(),
         headers: {

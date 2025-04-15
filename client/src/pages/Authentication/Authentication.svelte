@@ -1,18 +1,19 @@
 <script>
-  import Signin from './Signin/Signin.svelte';
-  import Signup from './Signup/Signup.svelte';
+  import Signin from '../../components/Authentication/Signin/Signin.svelte';
+  import Signup from '../../components/Authentication/Signup/Signup.svelte';
+  import { authCardState } from '../../stores/authCardStateStore.js';
 
-  let flipped = $state(false);
-
+  
+  let isFliped = $state($authCardState.isSigninCard);
   function flipCard() {
-    flipped = !flipped;
+    isFliped = !isFliped;
   }
 </script>
 
 
 
 <div class="container">
-  <div class={["card", { flipped }]}>
+  <div class={["card", { isFliped }]}>
     <div class="signup">
       <Signup />
     </div>
@@ -24,7 +25,7 @@
 
   <!-- TODO ADD FORGOT PASSWORD -->
   <a class="flip-link" onclick={flipCard}>
-    { flipped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
+    { isFliped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
   </a>
 </div>
 
@@ -57,7 +58,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Optional: adding a shadow for depth */
   }
 
-  .card.flipped {
+  .card.isFliped {
     transform: rotateY(0);
   }
 

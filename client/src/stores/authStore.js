@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 //TODO add isUser / isAdmin later for roles / authorization features
-function authStore() {
+function initAuthStore() {
     const { set, update, subscribe } = writable({ isSignedIn: false });
 
     return {
@@ -13,4 +13,4 @@ function authStore() {
     }
 }
 
-export const authentication = authStore();
+export const authStore = initAuthStore();

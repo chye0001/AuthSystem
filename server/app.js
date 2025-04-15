@@ -1,5 +1,4 @@
-import dotenv from 'dotenv';
-const env = dotenv.config();
+import 'dotenv/config'
 
 
 import express from 'express';
@@ -18,7 +17,7 @@ const generalLimiter = rateLimit({
 	standardHeaders: 'draft-8', // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
 	// store: ... , // Redis, Memcached, etc. See below.
-})
+}) 
 app.use(generalLimiter)
 
 const authLimiter = rateLimit({
@@ -32,11 +31,18 @@ app.use("/auth", authLimiter);
 
 import session from 'express-session';
 app.use(session({
-    secret: env.parsed.SESSION_SECRET, // have this secret in a .env file
+    secret: process.env.SESSION_SECRET, // have this secret in a .env file
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false }  //false beacause we use http in dev, but has to be true in production because it uses https
 }))
+
+
+import cors from 'cors';
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));
 
 
 import authRouter from './authRouter/authRouter.js';

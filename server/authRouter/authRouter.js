@@ -12,7 +12,7 @@ let users = [{
     id: 1,
     username: "test",
     email: "test@email.com",
-    password: "$2a$12$rC1vHxUFxCchYTIsbrjRc.X1cSdxW/F3Xt4XUlmIPLhxw1oS3aWmq",
+    password: "$2a$12$rC1vHxUFxCchYTIsbrjRc.X1cSdxW/F3Xt4XUlmIPLhxw1oS3aWmq", //123
     registedIps: new Set()
 }]
 
@@ -28,9 +28,8 @@ function isAlreadySignedIn(req, res, next) {
 
 router.post("/api/auth/signin", async (req, res) => {
     const { username, password } = req.body;
-
+    
     const foundUser = findUserBy("username", username);
-    console.log("founduser", foundUser);
     
     if (foundUser === undefined) {
         res.status(401).send({errorMessage: "Wrong credentials"});
@@ -47,6 +46,8 @@ router.post("/api/auth/signin", async (req, res) => {
         res.status(401).send({errorMessage: "Wrong credentials"});
     }
 })
+
+//TODO add signout endooint?
 
 
 
@@ -149,17 +150,6 @@ router.put("/api/auth/resetpassword", async (req, res) => {
 function findUserBy(field, value) {
     return users.find((user) => user[field] === value);
 }
-/*
-post endpoint for forgot password.
-send email with a link that hits the backend. 
-this link contains a unique id that is set on the user 
-and updates a value on the user that checks if there has been a request for password change.
-
-set expiration on the link. this could be a settimeout that reverts the boolflag
-
-how to generate unique id?
-
-*/
 
 
 

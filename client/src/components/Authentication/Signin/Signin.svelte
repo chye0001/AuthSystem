@@ -1,6 +1,7 @@
 <script>
     import toast, { Toaster } from 'svelte-french-toast';
-    import { authentication } from '../../../stores/authStore.js';
+    import { BASE_URL } from '../../../stores/apiStore.js';
+    import { authStore } from '../../../stores/authStore.js';
     import { signIn } from '../../../api/authentication/authentication.js';
 
 
@@ -18,12 +19,13 @@
         }
 
         let result;
-        if(!$authentication.isSignedIn) {
+        if(!$authStore.isSignedIn) {
             toast("Signing in...", {
                 icon: "⏳"
             })
 
-            result = await signIn(credentials);
+            result = await signIn($BASE_URL, credentials);
+            authStore.signIn();
         }
 
         result.success ? toast.success("Signed in") : toast.error("Wrong credentials try again...")

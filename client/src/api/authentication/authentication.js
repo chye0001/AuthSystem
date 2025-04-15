@@ -1,13 +1,12 @@
 import { checkForHttpErrors, makeOption } from "../../util/apiUtil.js";
-
 //TODO figure out how to implement .env files instead of hardcoded values
-const API_URL = "/api/auth";
+const ENDPOINT_PREFIX = "/api/auth";
 
-async function signIn(credentials={}) {
-
+async function signIn(baseURL, credentials={}) {
+    
     try {
         const payload = makeOption("POST", credentials);
-        const response = await fetch(API_URL + "/signin", payload);
+        const response = await fetch(baseURL + ENDPOINT_PREFIX + "/signin", payload);
         await checkForHttpErrors(response);
         const result = await response.json();
 
