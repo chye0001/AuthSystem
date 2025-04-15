@@ -25,10 +25,18 @@
             })
 
             result = await signIn($BASE_URL, credentials);
-            authStore.signIn();
         }
 
-        result.success ? toast.success("Signed in") : toast.error("Wrong credentials try again...")
+        if(result.success) {
+            toast.success("Signed in");
+            authStore.signIn();
+            
+            username = "";
+            password = "";
+
+        } else {
+            toast.error("Wrong credentials try again...");
+        }
     }
 </script>
 

@@ -8,8 +8,14 @@ function initAuthStore() {
         set,
         update,
         subscribe,
-        signOut: () => {set({ isSignedIn: false })},
-        signIn: () => {set({ isSignedIn: true })}
+        signIn: () => {
+            localStorage.setItem("authenticated", "true");
+            set({ isSignedIn: true })
+        },
+        signOut: () => {
+            localStorage.removeItem("authenticated");
+            set({ isSignedIn: false })
+        }
     }
 }
 

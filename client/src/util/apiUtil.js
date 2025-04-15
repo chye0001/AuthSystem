@@ -24,8 +24,7 @@ function makeOption(httpMethod, body) {
 async function checkForHttpErrors(response) {
     if (!response.ok) {
         let errorResponse = await response.json();
-        let error = new Error("status: " + response.status + "\nMessage: " + errorResponse.message);
-        error.apiError = errorResponse;
+        let error = new Error(errorResponse.errorMessage);
         throw error;
     }
 }

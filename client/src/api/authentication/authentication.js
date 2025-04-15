@@ -27,6 +27,31 @@ async function signIn(baseURL, credentials={}) {
 
 
 
+async function signUp(baseURL, signUpData) {
+    try{
+        const postOption = makeOption("POST", signUpData);
+        const response = await fetch(baseURL + ENDPOINT_PREFIX + "/signup", postOption);
+        
+        await checkForHttpErrors(response);
+
+        const result = await response.json();
+        return {
+            success: true,
+            data: result
+        };
+
+    }catch(error) {
+        console.error(error);
+        
+        return {
+            success: false,
+            errorMessage: error.message
+        };
+    }
+}
+
+
 export {
-    signIn
+    signIn,
+    signUp
 }
