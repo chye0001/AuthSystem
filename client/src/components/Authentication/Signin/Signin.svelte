@@ -3,8 +3,11 @@
     import { BASE_URL } from '../../../stores/apiStore.js';
     import { authStore } from '../../../stores/authStore.js';
     import { signIn } from '../../../api/authentication/authentication.js';
+  import { navigate } from 'svelte-routing';
 
 
+    const { from } = $props()
+    const originalPath = from.from;
 
     let username = $state("");
     let password = $state("");
@@ -19,7 +22,7 @@
         }
 
         let result;
-        if(!$authStore.isSignedIn) {
+        if(!$authStore.isAuthenticated) {
             toast("Signing in...", {
                 icon: "⏳"
             })
@@ -28,8 +31,16 @@
         }
 
         if(result.success) {
+
             toast.success("Signed in");
             authStore.signIn();
+
+            if(originalPath) {
+                navigate(originalPath);
+
+            } else {
+                navigate("/");
+            }
             
             username = "";
             password = "";

@@ -5,6 +5,9 @@
   import { BASE_URL } from "../../../stores/apiStore";
   import { authStore } from '../../../stores/authStore';
 
+  const { from } = $props();
+  const originalPath = from.from;
+
   let username = $state("");
   let email = $state("");
   let password = $state("");
@@ -34,7 +37,13 @@
     if(result.success) {
         toast.success("Signed up");
         authStore.signIn();
-        navigate("/");
+
+        if(originalPath){
+          navigate(originalPath);
+
+        } else {
+          navigate("/");
+        }
 
     } else {
         toast.error(result.errorMessage);

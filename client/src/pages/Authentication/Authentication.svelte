@@ -4,6 +4,8 @@
   import { authCardState } from '../../stores/authCardStateStore.js';
 
   
+  let from = $state(window.history.state);
+
   let isFliped = $state($authCardState.isSigninCard);
   function flipCard() {
     isFliped = !isFliped;
@@ -15,11 +17,11 @@
 <div class="container">
   <div class={["card", { isFliped }]}>
     <div class="signup">
-      <Signup />
+      <Signup {from}/>
     </div>
 
     <div class="signin">
-      <Signin />
+      <Signin {from}/>
     </div>
   </div>
 

@@ -2,7 +2,8 @@ import { writable } from 'svelte/store';
 
 //TODO add isUser / isAdmin later for roles / authorization features
 function initAuthStore() {
-    const { set, update, subscribe } = writable({ isSignedIn: false });
+    const isAuthenticated = localStorage.getItem("authenticated") === "true";
+    const { set, update, subscribe } = writable({ isAuthenticated: isAuthenticated });
 
     return {
         set,
@@ -10,11 +11,19 @@ function initAuthStore() {
         subscribe,
         signIn: () => {
             localStorage.setItem("authenticated", "true");
-            set({ isSignedIn: true })
+            set({ isAuthenticated: true })
         },
         signOut: () => {
             localStorage.removeItem("authenticated");
-            set({ isSignedIn: false })
+            set({ isAuthenticated: false })
+        },
+        isAuthenticated: () => {
+            const isAuthenticated = localStorage.getItem("authenticated");
+            if(!isAuthenticated) {
+                return false;
+            }
+
+            return true;
         }
     }
 }
