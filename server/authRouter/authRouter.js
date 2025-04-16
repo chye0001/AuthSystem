@@ -101,14 +101,14 @@ router.post("/api/auth/forgotpassword", async (req, res) => {
     }
 
     const currentTime = new Date();
-    if (foundUser.timeOut > currentTime) {
-        const seconds = Math.floor((foundUser.timeOut - currentTime) / 1000);
+    if (foundUser.ratelimitExperation > currentTime) {
+        const seconds = Math.floor((foundUser.ratelimitExperation - currentTime) / 1000);
         res.status(400).send({ errorMessage: `Wait ${seconds} seconds before requesting new reset link` })
         return;
     }
     
-    const timeOut = new Date(Date.now() + 1 * 60 * 1000) //1 minute
-    foundUser.timeOut = timeOut;
+    const ratelimitExperation = new Date(Date.now() + 1 * 60 * 1000) //1 minute
+    foundUser.ratelimitExperation = ratelimitExperation;
 
     const uniqueRestPasswordId = getUniqueRestPasswordId();
     const resetPasswordRequet = {
