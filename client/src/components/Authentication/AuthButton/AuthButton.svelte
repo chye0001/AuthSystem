@@ -2,19 +2,22 @@
   import { navigate } from "svelte-routing";
   import { authCardState } from "../../../stores/authCardStateStore.js";
   import { authStore } from "../../../stores/authStore.js";
+  import { BASE_URL } from "../../../stores/apiStore.js";
+  import { signOut } from "../../../api/authentication/authentication.js";
 
 
-  function onSignIn() {
+  function signIn() {
     authCardState.flipToSignIn();
     navigate("/authenticate", { replace: true });
   }
 
-  function onSignUp() {
+  function signUp() {
     authCardState.flipToSignUp();
     navigate("/authenticate", { replace: true });
   }
 
-  function signOut() {
+  async function onSignOut() {
+    await signOut($BASE_URL);
     authStore.signOut();
     navigate("/");
   }
@@ -22,11 +25,11 @@
 
 <div>
   {#if !$authStore.isAuthenticated}
-    <button onclick={onSignIn}>Sign in</button>
-    <button onclick={onSignUp}>Sign up</button>
+    <button onclick={signIn}>Sign in</button>
+    <button onclick={signUp}>Sign up</button>
 
   {:else}
-    <button onclick={signOut}>Sign out</button>
+    <button onclick={onSignOut}>Sign out</button>
     
   {/if}
 </div>

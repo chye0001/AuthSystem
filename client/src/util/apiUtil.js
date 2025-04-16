@@ -8,9 +8,10 @@ function makeOption(httpMethod, body) {
 
     const option = {
         method: httpMethod.toUpperCase(),
+        credentials: 'include',
         headers: {
             "Content-type": "application/json",
-            "Accept": "application/json"
+            "Accept": "application/json",
         }
     }
     if (body) {

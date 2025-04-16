@@ -1,3 +1,4 @@
+import { BASE_URL } from "../../stores/apiStore.js";
 import { checkForHttpErrors, makeOption } from "../../util/apiUtil.js";
 //TODO figure out how to implement .env files instead of hardcoded values
 const ENDPOINT_PREFIX = "/api/auth";
@@ -51,7 +52,21 @@ async function signUp(baseURL, signUpData) {
 }
 
 
+
+async function signOut(baseURL) {
+    try{
+        const postOption = makeOption("POST")
+        const response = await fetch(baseURL + ENDPOINT_PREFIX + "/signout", postOption);
+        await checkForHttpErrors(response);
+
+    }catch(error) {
+        console.error(error);
+    }
+}
+
+
 export {
     signIn,
-    signUp
+    signUp,
+    signOut
 }

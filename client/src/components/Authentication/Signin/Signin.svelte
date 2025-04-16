@@ -42,9 +42,6 @@
             } else {
                 navigate("/");
             }
-            
-            // username = "";
-            // password = "";
 
         } else {
             toast.error("Wrong credentials try again...");

@@ -18,13 +18,13 @@ let users = [{
 
 
 
-function isAlreadySignedIn(req, res, next) {
-    if(req.session.isSignedIn) {
-        next();
-    } 
+// function isAlreadySignedIn(req, res, next) {
+//     if(req.session.isSignedIn) {
+//         next();
+//     } 
 
-    return res.status(401).send({ errorMessage: "Authentication required" });
-}
+//     return res.status(401).send({ errorMessage: "Authentication required" });
+// }
 
 router.post("/api/auth/signin", async (req, res) => {
     const { username, password } = req.body;
@@ -47,8 +47,11 @@ router.post("/api/auth/signin", async (req, res) => {
     }
 })
 
-//TODO add signout endooint? 
 
+router.post("/api/auth/signout", (req, res) => {
+    req.session.destroy();
+    res.send({});
+})
 
 
 router.post("/api/auth/signup", async (req, res) => {
