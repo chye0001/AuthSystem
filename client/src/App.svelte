@@ -23,13 +23,8 @@
     </Route>
 
     <PrivateRoute path="/petjournal">
-      <PetJournal>
-
-      </PetJournal>
-    </PrivateRoute>
-    <!-- <Route path="/petjournal">
       <PetJournal/>
-    </Route> -->
+    </PrivateRoute>
 
     <Route path="/authenticate">
       <Authentication/>

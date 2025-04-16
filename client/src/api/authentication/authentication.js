@@ -12,7 +12,7 @@ async function signIn(baseURL, credentials={}) {
 
         return {
             success: true,
-            data: result
+            data: result.data
         }
 
     }catch(error) {
@@ -37,7 +37,7 @@ async function signUp(baseURL, signUpData) {
         const result = await response.json();
         return {
             success: true,
-            data: result
+            data: result.data
         };
 
     }catch(error) {

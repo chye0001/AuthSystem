@@ -35,8 +35,11 @@
     const result = await signUp($BASE_URL, signUpData);
 
     if(result.success) {
+        const username = result.data.username;
+        const email = result.data.email;
+        authStore.signIn(username, email);
+
         toast.success("Signed up");
-        authStore.signIn();
 
         if(originalPath){
           navigate(originalPath);

@@ -40,7 +40,7 @@ router.post("/api/auth/signin", async (req, res) => {
         
         await sendEmailOnSignIn(foundUser, req);
 
-        res.send({ username: foundUser.username, email: foundUser.email });
+        res.send({ data: {username: foundUser.username, email: foundUser.email} });
         
     } else {
         res.status(401).send({errorMessage: "Wrong credentials"});

@@ -12,7 +12,6 @@
     let username = $state("");
     let password = $state("");
 
-    //TODO redirection to protected page and implimenting of guard routes.
     async function handleSignIn(event) {
         event.preventDefault();
 
@@ -31,9 +30,11 @@
         }
 
         if(result.success) {
+            const username = result.data.username;
+            const email = result.data.email;
+            authStore.signIn(username, email);
 
             toast.success("Signed in");
-            authStore.signIn();
 
             if(originalPath) {
                 navigate(originalPath);
@@ -42,8 +43,8 @@
                 navigate("/");
             }
             
-            username = "";
-            password = "";
+            // username = "";
+            // password = "";
 
         } else {
             toast.error("Wrong credentials try again...");
