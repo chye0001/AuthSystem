@@ -1,3 +1,4 @@
 Add forgot password to the auth card.
 look at the forgot password logic again
 
+add .env file store the base url inside this file instead of importing it from the store in every component.

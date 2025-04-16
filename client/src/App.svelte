@@ -5,6 +5,8 @@
   import PetJournal from './pages/PetJournal/PetJournal.svelte';
   import AuthButton from './components/Authentication/AuthButton/AuthButton.svelte';
   import PrivateRoute from './components/Authentication/PrivateRoute/PrivateRoute.svelte';
+  import RequestPasswordReset from './pages/ResetPassword/RequestPasswordReset.svelte';
+  import ResetPassword from './pages/ResetPassword/ResetPassword.svelte';
 
   const url = "";
 </script>
@@ -29,5 +31,15 @@
     <Route path="/authenticate">
       <Authentication/>
     </Route>
+
+    <Route path="/request-reset-password">
+      <RequestPasswordReset/>
+    </Route>
+
+    <Route path="/restpassword/*">
+      <ResetPassword/>
+    </Route>
+
+    <!-- TODO create a 404 not found -->
   </div>
 </Router>

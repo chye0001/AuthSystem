@@ -1,14 +1,19 @@
 <script>
+  import { navigate } from 'svelte-routing';
   import Signin from '../../components/Authentication/Signin/Signin.svelte';
   import Signup from '../../components/Authentication/Signup/Signup.svelte';
   import { authCardState } from '../../stores/authCardStateStore.js';
-
   
   let from = $state(window.history.state);
 
   let isFliped = $state($authCardState.isSigninCard);
   function flipCard() {
     isFliped = !isFliped;
+  }
+
+  function redirectToRequestPasswordResetForm() {
+    console.log("redirecting");
+    navigate("/request-reset-password");
   }
 </script>
 
@@ -29,6 +34,13 @@
   <a class="flip-link" onclick={flipCard}>
     { isFliped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
   </a>
+
+  {#if isFliped}
+  <a class="flip-link" onclick={redirectToRequestPasswordResetForm}>
+    Forgot password...
+  </a>
+  {/if}
+  
 </div>
 
 
@@ -95,7 +107,7 @@
   }
 
   .flip-link {
-    margin-top: 1em;
+    /* margin-top: 1em; */
     color: var(--fg-1);
     text-decoration: underline;
     cursor: pointer;

@@ -65,8 +65,57 @@ async function signOut(baseURL) {
 }
 
 
+
+async function requestPasswordReset(baseURL, email) {
+    try{
+        const postOption = makeOption("POST", {email: email});
+        const response = await fetch(baseURL + ENDPOINT_PREFIX + "/forgotpassword", postOption);
+        await checkForHttpErrors(response);
+
+        const result = await response.json();
+        return{
+            success: true,
+            data: result.data
+        };
+
+    }catch(error) {
+        console.error(error);
+        return {
+            success: false,
+            errorMessage: error.message
+        };
+    }
+}
+
+
+
+async function resetPassword(baseURL, resetToken, newPassword) {
+    try{
+        const putOption = makeOption("PUT", {resetPasswordId: resetToken, newPassword: newPassword});
+        const response = await fetch(baseURL + ENDPOINT_PREFIX + "/resetpassword", putOption);
+        await checkForHttpErrors(response);
+
+        const result = await response.json();
+        return {
+            success: true,
+            data: result.data
+        };
+
+    }catch(error) {
+        console.error(error);
+        return {
+            success: false,
+            errorMessage: error.message
+        };
+    }
+}
+
+
+
 export {
     signIn,
     signUp,
-    signOut
+    signOut,
+    requestPasswordReset,
+    resetPassword
 }

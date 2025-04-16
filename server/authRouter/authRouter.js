@@ -90,15 +90,25 @@ router.post("/api/auth/signup", async (req, res) => {
 })
 
 
-
+//TODO clean up code make middleware for checks
 router.post("/api/auth/forgotpassword", async (req, res) => {
     const { email } = req.body;
-
+    
     const foundUser = findUserBy("email", email)
     if ( foundUser === undefined ) {
-        res.status(404).send({ errorMessage: "Invalid email" });
+        res.status(404).send({ errorMessage: "No user found with that email" });
         return;
     }
+
+    const currentTime = new Date();
+    if (foundUser.timeOut > currentTime) {
+        const seconds = Math.floor((foundUser.timeOut - currentTime) / 1000);
+        res.status(400).send({ errorMessage: `Wait ${seconds} seconds before requesting new reset link` })
+        return;
+    }
+    
+    const timeOut = new Date(Date.now() + 1 * 60 * 1000) //1 minute
+    foundUser.timeOut = timeOut;
 
     const uniqueRestPasswordId = getUniqueRestPasswordId();
     const resetPasswordRequet = {
@@ -106,6 +116,7 @@ router.post("/api/auth/forgotpassword", async (req, res) => {
         expiration: new Date(Date.now() + 20 * 60 * 1000) //20 minutes from now
     }
     foundUser.resetPasswordRequet = resetPasswordRequet;
+
 
     //TODO ensure in the frontend it routes to a page containing a form for reseting password
     // explore if you can use wildcards eks. /resetpassword/* then send the email to the backend and the unique id.
@@ -115,15 +126,18 @@ router.post("/api/auth/forgotpassword", async (req, res) => {
     res.send({ data: uniqueRestPasswordLink });
 })
 
+//TODO clean up code by creating middle ware...
 router.put("/api/auth/resetpassword", async (req, res) => {
-    const { email, resetPasswordId, newPassword } = req.body;
+    const { resetPasswordId, newPassword } = req.body;
 
-    let foundUser = findUserBy("email", email);
+    let foundUser = users.find((user) => user.resetPasswordRequet.resetPasswordId === resetPasswordId);
+    console.log("founduser", foundUser);
+    
     if (foundUser === undefined) {
         res.status(404).send({ errorMessage: "Invalid email" });
     }
 
-    const resetPasswordRequet = foundUser.resetPasswordRequet || undefined; // ensure application does not crash?
+    const resetPasswordRequet = foundUser.resetPasswordRequet || undefined; // ensures application does not crash?
     if ( resetPasswordRequet === undefined || resetPasswordRequet.resetPasswordId !== resetPasswordId) {
         res.status(400).send({ errorMessage: "No resetpassword request found" });
         return;
@@ -134,18 +148,19 @@ router.put("/api/auth/resetpassword", async (req, res) => {
         res.status(400).send({ errorMessage: "The password reset request has expired" })
         return;
     }
-
+    
+    const email = foundUser.email;
     if ( resetPasswordRequet.resetPasswordId === resetPasswordId && resetPasswordRequet.expiration > currentTime) {
         foundUser = {...foundUser, password: await hashPassword(newPassword)};
 
-        const userIndex = users.findIndex(user => user.email === email);
+        const userIndex = users.findIndex((user) => user.email === email);
         if (userIndex !== -1) {
             users[userIndex] = foundUser;
         }
     }
 
     await sendEmailConfirmPasswordChanged(email);
-    res.send({ data: {username: foundUser.username, email: foundUser.email}});
+    res.send({ data: {username: foundUser.username, email: email}});
 })
 
 
