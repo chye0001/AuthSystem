@@ -27,7 +27,7 @@ async function sendMail(recipientEmail, subject, message) {
 
 
 
-async function sendEmailOnSignIn(foundUser, req) {
+async function sendEmailOnNewIpSignIn(foundUser, req) {
     
     const registedIps = foundUser.registedIps;
     const newSignInIp = req.ip;
@@ -46,7 +46,7 @@ async function sendEmailOnSignIn(foundUser, req) {
 //TODO perhaps create a file that stores default email values for signIn & signUps?
 async function sendEmailOnSignUp(newUser, req) {
     await sendMail(newUser.email, "New signup", `Thanks for signing up, ${newUser.username}!`);
-    await sendEmailOnSignIn(newUser, req);
+    await sendEmailOnNewIpSignIn(newUser, req);
 }
 
 
@@ -63,7 +63,7 @@ async function sendEmailConfirmPasswordChanged(email) {
 
 
 export {
-    sendEmailOnSignIn,
+    sendEmailOnNewIpSignIn,
     sendEmailOnSignUp,
     sendEmailWithResetLink,
     sendEmailConfirmPasswordChanged

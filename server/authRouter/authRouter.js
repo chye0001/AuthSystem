@@ -1,10 +1,7 @@
-import { sendEmailOnSignIn, sendEmailOnSignUp, sendEmailWithResetLink, sendEmailConfirmPasswordChanged } from '../emailService/emailService.js';
+import { sendEmailOnNewIpSignIn, sendEmailOnSignUp, sendEmailWithResetLink, sendEmailConfirmPasswordChanged } from '../emailService/emailService.js';
 import { hashPassword, isValidPassword } from '../util/bcrypt.js';
-import { getUniqueRestPasswordId, getResetLink } from '../util/resetPassword.js';
-import dotenv from 'dotenv';
+import { getUniqueRestPasswordId as getUniqueRestToken, getResetLink } from '../util/resetPassword.js';
 import { Router } from 'express';
-
-const env = dotenv.config();
 const router = Router();
 
 let nextId = 2;
@@ -18,43 +15,22 @@ let users = [{
 
 
 
-// function isAlreadySignedIn(req, res, next) {
-//     if(req.session.isSignedIn) {
-//         next();
-//     } 
-
-//     return res.status(401).send({ errorMessage: "Authentication required" });
-// }
-
-router.post("/api/auth/signin", async (req, res) => {
-    const { username, password } = req.body;
+router.post("/api/auth/signin", validateCredentials, async (req, res) => {
+    const user = req.user;
     
-    const foundUser = findUserBy("username", username);
-    
-    if (foundUser === undefined) {
-        res.status(401).send({errorMessage: "Wrong credentials"});
-    }
-    
-    if (await isValidPassword(password, foundUser.password)) {
-        req.session.isSignedIn = (req.session.isSignedIn) || true
-        
-        await sendEmailOnSignIn(foundUser, req);
-
-        res.send({ data: {username: foundUser.username, email: foundUser.email} });
-        
-    } else {
-        res.status(401).send({errorMessage: "Wrong credentials"});
-    }
-})
+    req.session.isSignedIn = (req.session.isSignedIn) || true
+    await sendEmailOnNewIpSignIn(user, req);
+    res.send({ data: {username: user.username, email: user.email} });
+});
 
 
 router.post("/api/auth/signout", (req, res) => {
     req.session.destroy();
     res.send({});
-})
+});
 
 
-router.post("/api/auth/signup", async (req, res) => {
+router.post("/api/auth/signup", validateUniqueCredentials, async (req, res) => {
     const { username, email, password } = req.body;
 
     const hashedPassword = await hashPassword(password);
@@ -66,108 +42,144 @@ router.post("/api/auth/signup", async (req, res) => {
         registedIps: new Set()
     }
 
-    const isUsernameTaken = findUserBy("username", username);
-    if(isUsernameTaken !== undefined) {
-        res.status(400).send({ errorMessage: "Username taken find a new one" })
-        return;
-    }
-
-    const isEmailTaken = findUserBy("email", email);
-    if(isEmailTaken !== undefined) {
-        res.status(400).send({ errorMessage: "Email already in use" })
-        return;
-    }
-
     users.push(newUser);
     await sendEmailOnSignUp(newUser, req);
     req.session.isSignedIn = (req.session.isSignedIn) || true
 
-    const newUserDTO = {
-        username: newUser.username,
-        email: newUser.email
-    }
-    res.send({ data: newUserDTO });
-})
+    res.send({ data: {username: newUser.username, email: newUser.email} });
+});
 
 
-//TODO clean up code make middleware for checks
-router.post("/api/auth/forgotpassword", async (req, res) => {
+
+router.post("/api/auth/forgotpassword", validatePasswordResetRequest, async (req, res) => {
     const { email } = req.body;
-    
-    const foundUser = findUserBy("email", email)
-    if ( foundUser === undefined ) {
-        res.status(404).send({ errorMessage: "No user found with that email" });
-        return;
-    }
-
-    const currentTime = new Date();
-    if (foundUser.ratelimitExperation > currentTime) {
-        const seconds = Math.floor((foundUser.ratelimitExperation - currentTime) / 1000);
-        res.status(400).send({ errorMessage: `Wait ${seconds} seconds before requesting new reset link` })
-        return;
-    }
+    const user = req.user;
     
     const ratelimitExperation = new Date(Date.now() + 1 * 60 * 1000) //1 minute
-    foundUser.ratelimitExperation = ratelimitExperation;
+    user.ratelimitExperation = ratelimitExperation;
 
-    const uniqueRestPasswordId = getUniqueRestPasswordId();
+    const resetToken = getUniqueRestToken();
     const resetPasswordRequet = {
-        resetPasswordId: uniqueRestPasswordId,
-        expiration: new Date(Date.now() + 20 * 60 * 1000) //20 minutes from now
+        resetToken: resetToken,
+        expiration: new Date(Date.now() + 10 * 60 * 1000) //10 minutes from now
     }
-    foundUser.resetPasswordRequet = resetPasswordRequet;
+    user.resetPasswordRequet = resetPasswordRequet;
+
+    const resetLink = getResetLink(resetToken);
+    await sendEmailWithResetLink(email, resetToken);
+
+    res.send({ data: resetLink });
+});
 
 
-    //TODO ensure in the frontend it routes to a page containing a form for reseting password
-    // explore if you can use wildcards eks. /resetpassword/* then send the email to the backend and the unique id.
-    const uniqueRestPasswordLink = getResetLink(uniqueRestPasswordId);
-    await sendEmailWithResetLink(email, uniqueRestPasswordId);
 
-    res.send({ data: uniqueRestPasswordLink });
-})
-
-//TODO clean up code by creating middle ware...
-router.put("/api/auth/resetpassword", async (req, res) => {
-    const { resetPasswordId, newPassword } = req.body;
-
-    let foundUser = users.find((user) => user.resetPasswordRequet.resetPasswordId === resetPasswordId);
-    console.log("founduser", foundUser);
+router.put("/api/auth/resetpassword", validateResetToken, async (req, res) => {
+    const { newPassword } = req.body;
+    let user = req.user;
     
-    if (foundUser === undefined) {
-        res.status(404).send({ errorMessage: "Invalid email" });
-    }
-
-    const resetPasswordRequet = foundUser.resetPasswordRequet || undefined; // ensures application does not crash?
-    if ( resetPasswordRequet === undefined || resetPasswordRequet.resetPasswordId !== resetPasswordId) {
-        res.status(400).send({ errorMessage: "No resetpassword request found" });
-        return;
-    }
-
-    const currentTime = new Date();
-    if(resetPasswordRequet.expiration < currentTime) {
-        res.status(400).send({ errorMessage: "The password reset request has expired" })
-        return;
-    }
+    user = {...user, password: await hashPassword(newPassword)};
     
-    const email = foundUser.email;
-    if ( resetPasswordRequet.resetPasswordId === resetPasswordId && resetPasswordRequet.expiration > currentTime) {
-        foundUser = {...foundUser, password: await hashPassword(newPassword)};
-
-        const userIndex = users.findIndex((user) => user.email === email);
-        if (userIndex !== -1) {
-            users[userIndex] = foundUser;
-        }
+    const email = user.email;
+    const userIndex = users.findIndex((user) => user.email === email);
+    if (userIndex !== -1) {
+        users[userIndex] = user;
     }
 
     await sendEmailConfirmPasswordChanged(email);
-    res.send({ data: {username: foundUser.username, email: email}});
-})
+    res.send({ data: {username: user.username, email: email}});
+});
 
 
 
 function findUserBy(field, value) {
     return users.find((user) => user[field] === value);
 }
+
+
+
+async function validateCredentials(req, res, next) {
+    const { username, password } = req.body;
+    
+    const foundUser = findUserBy("username", username);
+    if (foundUser === undefined) {
+        return res.status(401).send({errorMessage: "Wrong credentials"});
+    }
+
+    const isCorrectPassword = await isValidPassword(password, foundUser.password);
+    if(!isCorrectPassword) {
+       return res.status(401).send({errorMessage: "Wrong credentials"});
+    }
+
+    req.user = foundUser;
+    next();
+}
+
+
+
+function validateUniqueCredentials(req, res, next) {
+    const { username, email } = req.body;
+
+    const isUsernameTaken = findUserBy("username", username);
+    if(isUsernameTaken !== undefined) {
+        return res.status(400).send({ errorMessage: "Username taken find a new one" });
+    }
+
+    const isEmailTaken = findUserBy("email", email);
+    if(isEmailTaken !== undefined) {
+        return res.status(400).send({ errorMessage: "Email already in use" });
+    }
+
+    next();
+}
+
+
+
+function validatePasswordResetRequest(req, res, next) {
+    const { email } = req.body;
+    
+    const foundUser = findUserBy("email", email)
+    if ( foundUser === undefined ) {
+        return res.status(404).send({ errorMessage: "No user found with that email" });
+    }
+
+    const currentTime = new Date();
+    if (foundUser.ratelimitExperation > currentTime) {
+        const seconds = Math.floor((foundUser.ratelimitExperation - currentTime) / 1000);
+        return res.status(400).send({ errorMessage: `Wait ${seconds} seconds before requesting new reset link` })
+    }
+
+    req.user = foundUser;
+    next();
+}
+
+
+
+function validateResetToken(req, res, next) {
+    const { resetToken } = req.body;
+
+    let foundUser = users.find((user) => user.resetPasswordRequet.resetToken === resetToken);
+    if (foundUser === undefined) {
+        return res.status(404).send({ errorMessage: "Invalid reset token" });
+    }
+
+    const currentTime = new Date();
+    if(foundUser.resetPasswordRequet.expiration < currentTime) {
+        return res.status(400).send({ errorMessage: "The request has expired" })
+    }
+
+    req.user = foundUser;
+    next();
+}
+
+
+
+// function isAlreadySignedIn(req, res, next) {
+//     if(req.session.isSignedIn) {
+//         next();
+//     } 
+
+//     return res.status(401).send({ errorMessage: "Authentication required" });
+// }
 
 
 
