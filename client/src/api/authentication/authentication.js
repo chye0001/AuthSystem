@@ -91,7 +91,7 @@ async function requestPasswordReset(baseURL, email) {
 
 async function resetPassword(baseURL, resetToken, newPassword) {
     try{
-        const putOption = makeOption("PUT", {resetPasswordId: resetToken, newPassword: newPassword});
+        const putOption = makeOption("PUT", {resetToken: resetToken, newPassword: newPassword});
         const response = await fetch(baseURL + ENDPOINT_PREFIX + "/resetpassword", putOption);
         await checkForHttpErrors(response);
 

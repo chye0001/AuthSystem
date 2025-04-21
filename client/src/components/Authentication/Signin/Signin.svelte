@@ -71,4 +71,4 @@
 
 <style>
     @import '../../../styles/form.css';
-  </style>
+</style>

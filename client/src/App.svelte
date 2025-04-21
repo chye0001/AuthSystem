@@ -40,6 +40,12 @@
       <ResetPassword/>
     </Route>
 
-    <!-- TODO create a 404 not found -->
+    <!-- TODO fix 404 not found-->
+     <!-- For some reason when this is uncommented the privateRouteGuard does not work and redirects to 404 not found instead of auth -->
+    <!-- <Route path="*">
+      <h1>404</h1>
+      <h2>Not Found</h2>
+    </Route> -->
+
   </div>
 </Router>

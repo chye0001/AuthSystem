@@ -156,7 +156,7 @@ function validatePasswordResetRequest(req, res, next) {
 
 function validateResetToken(req, res, next) {
     const { resetToken } = req.body;
-
+    
     let foundUser = users.find((user) => user.resetPasswordRequet.resetToken === resetToken);
     if (foundUser === undefined) {
         return res.status(404).send({ errorMessage: "Invalid reset token" });

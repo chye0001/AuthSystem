@@ -26,7 +26,7 @@
 
         //TODO make this persist when leaving page and coming back
         isSent = true;
-        const intervalId = setInterval(() => console.log(timer--), 1000) //1 seconds
+        const intervalId = setInterval(() => timer--, 1000) //1 seconds
         setTimeout(() => {
             isSent = false;
             clearInterval(intervalId);
@@ -39,20 +39,34 @@
 
 <Toaster/>
 
-{#if isSent}
-    <h4>{timer} seconds before you can send another request</h4>
-{/if}
+<div class="container card">
+    
+    <form onsubmit={sendPasswordResetRequest}>
+            <h2>Request password reset</h2>
+            
+            {#if isSent}
+                <h4>{timer} seconds before you can send another request</h4>
+            {/if}
 
-<form onsubmit={sendPasswordResetRequest}>
-    <h2>Request password reset</h2>
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input bind:value={email} id="email" type="text" placeholder="your email..." required>
-    </div>
-
-    <button type="submit">Send</button>
-</form>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input bind:value={email} id="email" type="text" placeholder="your email..." required>
+            </div>
+    
+            <button type="submit">Send</button>
+    </form>
+</div>
 
 <style>
     @import '../../styles/form.css';
+
+    input {
+        margin-left: 2em;
+        margin-right: 2em;
+    }
+
+    button {
+        margin-left: 2em;
+        margin-right: 2em;
+    }
 </style>
