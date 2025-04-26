@@ -45,7 +45,7 @@ app.use(cors({
 }));
 
 
-import authRouter from './authRouter/authRouter.js';
+import authRouter from './router/authRouter.js';
 app.use(authRouter);
 
 

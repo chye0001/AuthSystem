@@ -19,7 +19,7 @@
 
 
 
-<div class="container">
+<div class="flex flex-col items-center mt-12">
   <div class={["card", { isFliped }]}>
     <div class="signup">
       <Signup {from}/>
@@ -31,7 +31,7 @@
   </div>
 
   <!-- TODO ADD FORGOT PASSWORD -->
-  <a class="flip-link" onclick={flipCard}>
+  <a class="flip-link mt-4" onclick={flipCard}>
     { isFliped ? "Dont have an account? Sign Up" : "Already have an account? Sign In" }
   </a>
 
@@ -47,15 +47,6 @@
 
 <style>
   /* FROM SVELTE DOCS CARD FLIP */
-  .container {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    perspective: 100vh;
-  }
 
   .card {
     position: relative;
@@ -107,7 +98,6 @@
   }
 
   .flip-link {
-    /* margin-top: 1em; */
     color: var(--fg-1);
     text-decoration: underline;
     cursor: pointer;

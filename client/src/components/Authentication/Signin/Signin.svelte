@@ -52,7 +52,7 @@
 
 <Toaster />
 
-<form id="signin-card" onsubmit={handleSignIn}>
+<form onsubmit={handleSignIn}>
     <h2>Sign in</h2>
     <div class="form-group">
         <label for="signin-username">Username</label>

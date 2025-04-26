@@ -7,17 +7,13 @@
   import PrivateRoute from './components/Authentication/PrivateRoute/PrivateRoute.svelte';
   import RequestPasswordReset from './pages/ResetPassword/RequestPasswordReset.svelte';
   import ResetPassword from './pages/ResetPassword/ResetPassword.svelte';
+  import Navbar from './components/Authentication/Navbar.svelte';
 
   const url = "";
 </script>
 
 <Router {url}>
-  <nav>
-    <Link to="/">Home...</Link>
-    <Link to="/petjournal">Pet Journal</Link>
-    <AuthButton/>
-  
-  </nav>
+  <Navbar/>
 
   <div>
     <Route path="/">

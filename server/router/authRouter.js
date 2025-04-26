@@ -173,14 +173,4 @@ function validateResetToken(req, res, next) {
 
 
 
-// function isAlreadySignedIn(req, res, next) {
-//     if(req.session.isSignedIn) {
-//         next();
-//     } 
-
-//     return res.status(401).send({ errorMessage: "Authentication required" });
-// }
-
-
-
 export default router;

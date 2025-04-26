@@ -7,11 +7,13 @@
 
 
   function signIn() {
+    console.log("signin clicked");
     authCardState.flipToSignIn();
     navigate("/authenticate", { replace: true });
   }
 
   function signUp() {
+    console.log("signup clicked");
     authCardState.flipToSignUp();
     navigate("/authenticate", { replace: true });
   }
@@ -25,11 +27,14 @@
 
 <div>
   {#if !$authStore.isAuthenticated}
-    <button onclick={signIn}>Sign in</button>
-    <button onclick={signUp}>Sign up</button>
+    
+    <div class="flex justify-between">
+      <button class="p-2 mr-3 border rounded" onclick={signIn}>Sign in</button>
+      <button class="p-2 border rounded" onclick={signUp}>Sign up</button>
+    </div>
 
   {:else}
-    <button onclick={onSignOut}>Sign out</button>
+    <button class="p-2 border rounded" onclick={onSignOut}>Sign out</button>
     
   {/if}
 </div>

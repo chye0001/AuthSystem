@@ -65,7 +65,7 @@
 
 
 <Toaster/>
-<form onsubmit={onSignUp} id="signup-card">
+<form onsubmit={onSignUp}>
   <h2>Sign up</h2>
   <div class="form-group">
     <label for="signup-username">Username</label>
