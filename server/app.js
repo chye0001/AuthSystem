@@ -13,7 +13,7 @@ app.use(helmet());
 import { generalLimiter } from './middleware/rateLimitter/generalLimiter.js';
 app.use(generalLimiter)
 import { authLimiter } from './middleware/rateLimitter/authLimiter.js';
-app.use("/auth", authLimiter);
+app.use("/api/auth/", authLimiter);
 
 
 import { sessionConfiguration } from './middleware/session.js';

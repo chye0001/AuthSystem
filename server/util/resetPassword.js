@@ -1,4 +1,4 @@
-function getUniqueRestPasswordId(length = 16) {
+function getUniqueRestToken(length = 16) {
     const randomBytes = new Uint8Array(length); // length 16 industry standard give 2^128 possible results, low chance of collision
     crypto.getRandomValues(randomBytes);
 
@@ -13,4 +13,4 @@ function getResetLink(uniqueRestPasswordId) {
     return `http://localhost:5173/restpassword/${uniqueRestPasswordId}`; // dev link
 }
 
-export { getUniqueRestPasswordId, getResetLink }
+export { getUniqueRestToken, getResetLink }
