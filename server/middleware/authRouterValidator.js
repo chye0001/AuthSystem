@@ -1,5 +1,5 @@
 import { isValidPassword } from '../util/bcrypt.js';
-import { users } from '../router/authRouter.js';
+import usersRepository from '../database/usersRepository.js';
 
 async function validateCredentials(req, res, next) {
     const { username, password } = req.body;
@@ -7,9 +7,9 @@ async function validateCredentials(req, res, next) {
     if(!username || !password) {
         return res.status(403).send({errorMessage: "Username and password must be included"});
     }
-
-    const foundUser = findUserBy("username", username);
-    if (foundUser === undefined) {
+    
+    const foundUser = await usersRepository.getUserBy("username", username);
+    if (foundUser === null) {
         return res.status(401).send({errorMessage: "Wrong credentials"});
     }
 
@@ -24,16 +24,20 @@ async function validateCredentials(req, res, next) {
 
 
 
-function validateUniqueCredentials(req, res, next) {
-    const { username, email } = req.body;
+async function validateUniqueCredentials(req, res, next) {
+    const { username, email, password } = req.body;
 
-    const isUsernameTaken = findUserBy("username", username);
-    if(isUsernameTaken !== undefined) {
+    if(!username || !email || !password) {
+        return res.status(403).send({ errorMessage: "username, email and password must be included"})
+    }
+
+    const isUsernameTaken = await usersRepository.getUserBy("username", username);
+    if(isUsernameTaken !== null) {
         return res.status(400).send({ errorMessage: "Username taken find a new one" });
     }
 
-    const isEmailTaken = findUserBy("email", email);
-    if(isEmailTaken !== undefined) {
+    const isEmailTaken = await usersRepository.getUserBy("email", email);
+    if(isEmailTaken !== null) {
         return res.status(400).send({ errorMessage: "Email already in use" });
     }
 
@@ -42,18 +46,16 @@ function validateUniqueCredentials(req, res, next) {
 
 
 
-function validatePasswordResetRequest(req, res, next) {
+async function validatePasswordResetRequest(req, res, next) {
     const { email } = req.body;
     
-    const foundUser = findUserBy("email", email)
-    if ( foundUser === undefined ) {
-        return res.status(404).send({ errorMessage: "No user found with that email" });
+    if(!email) {
+        return res.status(403).send({ errorMessage: "email must be included in the request"})
     }
 
-    const currentTime = new Date();
-    if (foundUser.ratelimitExperation > currentTime) {
-        const seconds = Math.floor((foundUser.ratelimitExperation - currentTime) / 1000);
-        return res.status(400).send({ errorMessage: `Wait ${seconds} seconds before requesting new reset link` })
+    const foundUser = await usersRepository.getUserBy("email", email)
+    if ( foundUser === null ) {
+        return res.status(404).send({ errorMessage: "No user found with that email" });
     }
 
     req.user = foundUser;
@@ -61,28 +63,29 @@ function validatePasswordResetRequest(req, res, next) {
 }
 
 
-
-function validateResetToken(req, res, next) {
-    const { resetToken } = req.body;
+async function validateResetToken(req, res, next) {
+    const { resetToken, newPassword } = req.body;
     
-    let foundUser = users.find((user) => user.resetPasswordRequet.resetToken === resetToken);
-    if (foundUser === undefined) {
+    if(!resetToken) {
+        return res.status(403).send({ errorMessage: "Reset token not included in request"});
+    }
+
+    if(!newPassword) {
+        return res.status(403).send({ errorMessage: "You must send a new password in the request"});
+    }
+
+    let foundUser = await usersRepository.getUserByResetToken(resetToken);
+    if (foundUser === null) {
         return res.status(404).send({ errorMessage: "Invalid reset token" });
     }
 
     const currentTime = new Date();
-    if(foundUser.resetPasswordRequet.expiration < currentTime) {
-        return res.status(400).send({ errorMessage: "The request has expired" })
+    if(foundUser.resetToken.expiration_date < currentTime) {
+        return res.status(400).send({ errorMessage: "The password reset token has expired, send a new reset password request" })
     }
 
     req.user = foundUser;
     next();
-}
-
-
-
-function findUserBy(field, value) {
-    return users.find((user) => user[field] === value);
 }
 
 

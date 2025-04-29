@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import usersRepository from '../database/usersRepository.js';
 
 const testAccount = await nodemailer.createTestAccount();
 
@@ -29,24 +30,19 @@ async function sendMail(recipientEmail, subject, message) {
 
 async function sendEmailOnNewIpSignIn(foundUser, req) {
     
-    const registedIps = foundUser.registedIps;
-    const newSignInIp = req.ip;
-   
-    if(registedIps.size === 0) {
-        await sendMail(foundUser.email, `Welcome ${foundUser.username}!`, "welcome to our platform")
-        foundUser.registedIps.add(req.ip);
+    const registedIps = await usersRepository.getRegisteredIpsBy(foundUser.username);
+    const ip = req.ip;
 
-    } else if (!registedIps.has(newSignInIp)) {
-        await sendMail(foundUser.email, "New sign in", `We have detected a new sign in coming from this ip: ${newSignInIp}`)
-        foundUser.registedIps.add(req.ip);
+    if (!registedIps.includes(ip)) {
+        await sendMail(foundUser.email, "New sign in", `We have detected a new sign in coming from this ip: ${ip}`)
+        await usersRepository.registerNewIp(ip, foundUser.id);
     }
 }
 
 
 //TODO perhaps create a file that stores default email values for signIn & signUps?
-async function sendEmailOnSignUp(newUser, req) {
-    await sendMail(newUser.email, "New signup", `Thanks for signing up, ${newUser.username}!`);
-    await sendEmailOnNewIpSignIn(newUser, req);
+async function sendEmailOnSignUp(newUser) {
+    await sendMail(newUser.email, "New signup", `Welcome ${newUser.username}. Thanks for signing up, ${newUser.username}!`);
 }
 
 

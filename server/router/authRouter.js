@@ -3,16 +3,8 @@ import { sendEmailOnNewIpSignIn, sendEmailOnSignUp, sendEmailWithResetLink, send
 import { hashPassword } from '../util/bcrypt.js';
 import { getUniqueRestToken, getResetLink } from '../util/resetPassword.js';
 import { Router } from 'express';
+import usersRepository from '../database/usersRepository.js';
 const router = Router();
-
-let nextId = 2;
-export let users = [{
-    id: 1,
-    username: "test",
-    email: "test@email.com",
-    password: "$2a$12$rC1vHxUFxCchYTIsbrjRc.X1cSdxW/F3Xt4XUlmIPLhxw1oS3aWmq", //123
-    registedIps: new Set()
-}]
 
 
 
@@ -35,15 +27,8 @@ router.post("/api/auth/signup", validateUniqueCredentials, async (req, res) => {
     const { username, email, password } = req.body;
 
     const hashedPassword = await hashPassword(password);
-    const newUser = {
-        id: nextId++,
-        username: username,
-        email: email,
-        password: hashedPassword,
-        registedIps: new Set()
-    }
+    const newUser = await usersRepository.createNewUser(username, email, hashedPassword);
 
-    users.push(newUser);
     await sendEmailOnSignUp(newUser, req);
     req.session.isSignedIn = (req.session.isSignedIn) || true
 
@@ -54,17 +39,10 @@ router.post("/api/auth/signup", validateUniqueCredentials, async (req, res) => {
 
 router.post("/api/auth/forgotpassword", validatePasswordResetRequest, async (req, res) => {
     const { email } = req.body;
-    const user = req.user;
-
-    const ratelimitExperation = new Date(Date.now() + 1 * 60 * 1000) //1 minute
-    user.ratelimitExperation = ratelimitExperation;
+    const userId = req.user.id;
 
     const resetToken = getUniqueRestToken();
-    const resetPasswordRequet = {
-        resetToken: resetToken,
-        expiration: new Date(Date.now() + 10 * 60 * 1000) //10 minutes from now
-    }
-    user.resetPasswordRequet = resetPasswordRequet;
+    await usersRepository.createPasswordResetRequest(resetToken, userId);
 
     const resetLink = getResetLink(resetToken);
     await sendEmailWithResetLink(email, resetToken);
@@ -73,21 +51,21 @@ router.post("/api/auth/forgotpassword", validatePasswordResetRequest, async (req
 });
 
 
-
+//Since the resettoken is personal it is attached to the user, the validation will set the user on the request.
 router.put("/api/auth/resetpassword", validateResetToken, async (req, res) => {
-    const { newPassword } = req.body;
-    let user = req.user;
+    const { resetToken, newPassword } = req.body;
+    const hashedPassword = await hashPassword(newPassword);
+    const email = req.user.email;
 
-    user = { ...user, password: await hashPassword(newPassword) };
+    const userId = req.user.id;
+    const isReset = await usersRepository.resetPassword(hashedPassword, userId, resetToken);
 
-    const email = user.email;
-    const userIndex = users.findIndex((user) => user.email === email);
-    if (userIndex !== -1) {
-        users[userIndex] = user;
+    if(!isReset) {
+        return res.status(500).send({ errorMessage: "Something went wrong reseting password, please try again later and send new reset password request..."});
     }
 
     await sendEmailConfirmPasswordChanged(email);
-    res.send({ data: { username: user.username, email: email } });
+    res.send({ data: { username: req.user.username, email: email } });
 });
 
 
