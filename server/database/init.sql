@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS users (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  password VARCHAR(500) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ips (
+    id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ip VARCHAR(39),
+    user_id INTEGER NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+  token VARCHAR(36) UNIQUE NOT NULL,
+  expiration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '10 minutes',
+  user_id INTEGER NOT NULL,
+  CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+
+
+INSERT INTO users (username, email, password) VALUES ('test', 'test@email.com', '$2a$12$rC1vHxUFxCchYTIsbrjRc.X1cSdxW/F3Xt4XUlmIPLhxw1oS3aWmq'); --password 123
+INSERT INTO password_reset_tokens (token, user_id) VALUES ('TheToken', 1);
